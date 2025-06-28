@@ -600,7 +600,7 @@
             },
             
             // --- CONSTANTES ---
-            iconList: ['landmark', 'shopping-cart', 'utensils-crossed', 'home', 'car', 'heart-pulse', 'baby', 'graduation-cap', 'plane', 'briefcase', 'gift', 'paw-print', 'receipt', 'piggy-bank', 'scale', 'banknote', 'coins', 'credit-card', 'wallet', 'wrench', 'building', 'truck', 'sprout'],
+            iconList: ['landmark', 'shopping-cart', 'utensils-crossed', 'home', 'car', 'heart-pulse', 'graduation-cap', 'plane', 'briefcase', 'gift', 'paw-print', 'receipt', 'piggy-bank', 'scale', 'banknote', 'coins', 'credit-card', 'wallet', 'wrench', 'building', 'truck', 'sprout'],
 
             // --- INICIALIZAÇÃO E LIMPEZA ---
             init(userId) {
@@ -1088,6 +1088,8 @@
                 } else {
                     this.elements.transactionModalTitle.textContent = 'Nova Transação';
                     form.elements['transaction-due-date'].value = this.formatDateForInput(new Date());
+                    // CORREÇÃO: Limpa explicitamente o ID do atalho para evitar contaminação
+                    form.elements['transaction-shortcut-id'].value = '';
                 }
                 this.openModal('transaction-modal');
             },
