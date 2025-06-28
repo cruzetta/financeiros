@@ -29,6 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Obter sessão inicial
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Sessão inicial:', session)
       setSession(session)
       setUser(session?.user ?? null)
       setLoading(false)
@@ -38,6 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Mudança de auth:', event, session)
       setSession(session)
       setUser(session?.user ?? null)
       setLoading(false)
@@ -52,46 +54,67 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const createUserProfile = async (user: User) => {
-    const { error } = await supabase
-      .from('user_profiles')
-      .insert([
-        {
-          user_id: user.id,
-          email: user.email,
-          name: user.user_metadata?.name || null,
-        },
-      ])
+    try {
+      const { error } = await supabase
+        .from('user_profiles')
+        .insert([
+          {
+            user_id: user.id,
+            email: user.email,
+            name: user.user_metadata?.name || null,
+          },
+        ])
 
-    if (error) {
-      console.error('Erro ao criar perfil do usuário:', error)
+      if (error) {
+        console.error('Erro ao criar perfil do usuário:', error)
+      }
+    } catch (error) {
+      console.error('Erro ao criar perfil:', error)
     }
   }
 
   const signUp = async (email: string, password: string, name: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          name,
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+          },
         },
-      },
-    })
+      })
 
-    return { error }
+      return { error }
+    } catch (error) {
+      console.error('Erro no signup:', error)
+      return { error }
+    }
   }
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
-    return { error }
+      return { error }
+    } catch (error) {
+      console.error('Erro no signin:', error)
+      return { error }
+    }
   }
 
   const signOut = async () => {
-    await supabase.auth.signOut()
+    try {
+      const { error } = await supabase.auth.signOut()
+      if (error) {
+        console.error('Erro no signout:', error)
+      }
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error)
+    }
   }
 
   const value = {

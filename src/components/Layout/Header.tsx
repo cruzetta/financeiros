@@ -6,7 +6,11 @@ export function Header() {
   const { user, signOut } = useAuth()
 
   const handleSignOut = async () => {
-    await signOut()
+    try {
+      await signOut()
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error)
+    }
   }
 
   return (
@@ -25,7 +29,7 @@ export function Header() {
               </div>
               <button
                 onClick={handleSignOut}
-                className="flex items-center space-x-2 bg-red-50 hover:bg-red-100 text-red-700 px-3 py-2 rounded-lg transition-colors border border-red-200 hover:border-red-300"
+                className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors font-medium"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Sair</span>
