@@ -180,9 +180,15 @@
                 <section class="bg-gray-800 p-4 md:p-6 rounded-lg shadow-xl">
                     <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
                         <h3 class="text-2xl font-bold text-white">Transações do Período</h3>
-                        <div class="relative w-full sm:w-64">
-                            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
-                            <input type="text" id="search-input" placeholder="Buscar por descrição..." class="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                            <div class="relative w-full sm:w-64">
+                                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+                                <input type="text" id="search-input" placeholder="Buscar por descrição..." class="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div class="relative w-full sm:w-48">
+                                <i data-lucide="dollar-sign" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+                                <input type="number" id="search-amount-input" placeholder="Buscar por valor..." class="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
                         </div>
                     </div>
                     <div id="transactions-list" class="overflow-x-auto">
@@ -577,6 +583,7 @@
                 clients: [],
                 slaughters: [],
                 filterText: '',
+                filterAmount: null,
             },
 
             // --- ELEMENTOS DO DOM ---
@@ -589,6 +596,7 @@
                 expenseShortcuts: document.getElementById('expense-shortcuts'),
                 transactionsList: document.getElementById('transactions-list'),
                 searchInput: document.getElementById('search-input'),
+                searchAmountInput: document.getElementById('search-amount-input'),
                 clockDisplay: document.getElementById('clock-display'),
                 viewDashboard: document.getElementById('view-dashboard'),
                 viewConsultoria: document.getElementById('view-consultoria'),
@@ -621,7 +629,6 @@
                 confirmationMessage: document.getElementById('confirmation-message'),
                 confirmationButtons: document.getElementById('confirmation-buttons'),
                 confirmationIcon: document.getElementById('confirmation-icon'),
-                // NOVOS ELEMENTOS PARA O RESUMO DE CONSULTORIA
                 consultingKpiDashboard: document.getElementById('consulting-kpi-dashboard'),
                 consultingReceivedFrom: document.getElementById('consulting-received-from'),
                 consultingToReceiveFrom: document.getElementById('consulting-to-receive-from'),
@@ -646,10 +653,8 @@
             },
             
             cleanup() {
-                // Desativa todos os listeners do onSnapshot para evitar memory leaks
                 this.listeners.forEach(unsubscribe => unsubscribe());
                 this.listeners = [];
-                // Reseta o estado
                 this.isInitialized = false;
                 this.userId = null;
                 this.state.transactions = [];
@@ -739,41 +744,28 @@
             setupRealtimeListeners() {
                 if (!this.userId) return;
 
-                // Listener para Transações
                 const transactionsQuery = query(collection(db, "users", this.userId, "transactions"));
                 const unsubscribeTransactions = onSnapshot(transactionsQuery, (querySnapshot) => {
-                    const transactions = [];
-                    querySnapshot.forEach((doc) => {
-                        const data = doc.data();
-                        transactions.push({ 
-                            id: doc.id, 
-                            ...data,
-                            dueDate: data.dueDate.toDate(), // Converte Timestamp para Date
-                        });
-                    });
-                    this.state.transactions = transactions;
+                    this.state.transactions = querySnapshot.docs.map(doc => ({
+                        id: doc.id, 
+                        ...doc.data(),
+                        dueDate: doc.data().dueDate.toDate(),
+                    }));
                     this.updateUI();
                 });
                 this.listeners.push(unsubscribeTransactions);
 
-                // Listener para Atalhos
                 const shortcutsQuery = query(collection(db, "users", this.userId, "shortcuts"));
                  const unsubscribeShortcuts = onSnapshot(shortcutsQuery, (querySnapshot) => {
-                    const shortcuts = [];
-                    querySnapshot.forEach((doc) => {
-                        const data = doc.data();
-                        shortcuts.push({
-                            id: doc.id,
-                            ...data,
-                            createdAt: data.createdAt ? data.createdAt.toDate() : null, // Converte Timestamp para Date
-                        });
-                    });
-                    this.state.shortcuts = shortcuts;
+                    this.state.shortcuts = querySnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data(),
+                        createdAt: doc.data().createdAt ? doc.data().createdAt.toDate() : null,
+                    }));
                     this.updateUI();
                 });
                 this.listeners.push(unsubscribeShortcuts);
                 
-                // Listener para Clientes
                 const clientsQuery = query(collection(db, "users", this.userId, "clients"));
                 const unsubscribeClients = onSnapshot(clientsQuery, (querySnapshot) => {
                     this.state.clients = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -781,19 +773,13 @@
                 });
                 this.listeners.push(unsubscribeClients);
                 
-                // Listener para Abates
                 const slaughtersQuery = query(collection(db, "users", this.userId, "slaughters"));
                 const unsubscribeSlaughters = onSnapshot(slaughtersQuery, (querySnapshot) => {
-                    const slaughters = [];
-                    querySnapshot.forEach((doc) => {
-                        const data = doc.data();
-                        slaughters.push({
-                            id: doc.id,
-                            ...data,
-                            date: data.date.toDate(), // Converte Timestamp para Date
-                        });
-                    });
-                    this.state.slaughters = slaughters;
+                    this.state.slaughters = querySnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data(),
+                        date: doc.data().date.toDate(),
+                    }));
                     this.updateUI();
                 });
                 this.listeners.push(unsubscribeSlaughters);
@@ -805,9 +791,6 @@
 
                 await this.generateFixedTransactionsForCurrentPeriod();
                 
-                // A chamada para updateBalanceTransactionForPeriod foi removida daqui para evitar a condição de corrida.
-                // O cálculo agora é feito diretamente nas funções de renderização.
-
                 switch (this.state.currentView) {
                     case 'dashboard':
                         this.renderPeriodDisplay();
@@ -882,14 +865,11 @@
             renderKPIs() {
                 const period = this.getPeriod(this.state.currentDateForPeriod);
                 
-                // **INÍCIO DA CORREÇÃO**
-                // Pega as transações do estado e adiciona a transação de saldo do mês anterior
                 let transactionsInPeriod = this.state.transactions.filter(t => t.dueDate >= period.start && t.dueDate <= period.end);
                 const balanceTransaction = this.getPreviousPeriodBalanceTransaction();
                 if (balanceTransaction) {
                     transactionsInPeriod.unshift(balanceTransaction);
                 }
-                // **FIM DA CORREÇÃO**
 
                 const overdueExpenses = this.state.transactions.filter(t => 
                     t.dueDate < period.start && 
@@ -974,31 +954,36 @@
             renderTransactions() {
                 const period = this.getPeriod(this.state.currentDateForPeriod);
                 
-                // **INÍCIO DA CORREÇÃO**
-                // Cria uma lista de transações para renderizar, começando com a transação de saldo
-                let transactionsToRender = [];
-                const balanceTransaction = this.getPreviousPeriodBalanceTransaction();
-                if (balanceTransaction) {
-                    transactionsToRender.push(balanceTransaction);
+                let periodTransactions = this.state.transactions
+                    .filter(t => t.dueDate >= period.start && t.dueDate <= period.end);
+
+                // Aplicar filtros
+                if (this.state.filterText) {
+                    periodTransactions = periodTransactions.filter(t => 
+                        t.description.toLowerCase().includes(this.state.filterText.toLowerCase())
+                    );
+                }
+                if (this.state.filterAmount !== null && !isNaN(this.state.filterAmount)) {
+                     periodTransactions = periodTransactions.filter(t => t.amount === this.state.filterAmount);
                 }
                 
-                // Adiciona as outras transações do período
-                const periodTransactions = this.state.transactions
-                    .filter(t => t.dueDate >= period.start && t.dueDate <= period.end)
-                    .filter(t => t.description.toLowerCase().includes(this.state.filterText.toLowerCase()));
+                let transactionsToRender = [...periodTransactions];
 
-                transactionsToRender.push(...periodTransactions);
-                // **FIM DA CORREÇÃO**
+                const balanceTransaction = this.getPreviousPeriodBalanceTransaction();
+                const noFiltersActive = !this.state.filterText && (this.state.filterAmount === null || isNaN(this.state.filterAmount));
+                
+                if (balanceTransaction && noFiltersActive) {
+                    transactionsToRender.unshift(balanceTransaction);
+                }
 
                 transactionsToRender.sort((a, b) => {
-                    if (a.isBalanceTransfer) return -1; // Garante que o saldo venha primeiro
+                    if (a.isBalanceTransfer) return -1;
                     if (b.isBalanceTransfer) return 1;
                     return a.dueDate - b.dueDate;
                 });
 
-
                 if (transactionsToRender.length === 0) {
-                    this.elements.transactionsList.innerHTML = `<div class="text-center py-8 text-gray-500"><i data-lucide="inbox" class="w-12 h-12 mx-auto mb-2"></i><p>Nenhuma transação neste período.</p></div>`;
+                    this.elements.transactionsList.innerHTML = `<div class="text-center py-8 text-gray-500"><i data-lucide="inbox" class="w-12 h-12 mx-auto mb-2"></i><p>Nenhuma transação encontrada.</p></div>`;
                 } else {
                     this.elements.transactionsList.innerHTML = `
                         <div class="hidden md:grid grid-cols-12 gap-4 font-bold p-2 text-gray-400 text-sm">
@@ -1041,16 +1026,23 @@
             
             // --- LISTENERS DE EVENTOS ---
             setupEventListeners() {
-                // Navegação principal
                 this.elements.prevPeriodBtn.addEventListener('click', () => this.changePeriod(-1));
                 this.elements.nextPeriodBtn.addEventListener('click', () => this.changePeriod(1));
-                this.elements.searchInput.addEventListener('input', e => { this.state.filterText = e.target.value; this.renderTransactions(); });
                 
-                // Navegação por abas
+                this.elements.searchInput.addEventListener('input', e => { 
+                    this.state.filterText = e.target.value; 
+                    this.renderTransactions(); 
+                });
+                
+                this.elements.searchAmountInput.addEventListener('input', e => {
+                    const value = e.target.value;
+                    this.state.filterAmount = value === '' ? null : parseFloat(value);
+                    this.renderTransactions();
+                });
+                
                 this.elements.tabDashboard.addEventListener('click', () => this.switchView('dashboard'));
                 this.elements.tabConsultoria.addEventListener('click', () => this.switchView('consultoria-list'));
 
-                // Botões do modal
                 document.getElementById('add-transaction-btn').addEventListener('click', () => this.openTransactionModal());
                 document.getElementById('add-shortcut-btn').addEventListener('click', () => this.openShortcutModal());
                 document.getElementById('add-client-btn').addEventListener('click', () => this.openClientModal());
@@ -1059,23 +1051,17 @@
                 
                 document.querySelectorAll('.close-modal-btn').forEach(btn => btn.addEventListener('click', () => this.closeAllModals()));
                 
-                // Envios de formulário
                 this.elements.transactionForm.addEventListener('submit', e => this.handleTransactionFormSubmit(e));
                 this.elements.shortcutForm.addEventListener('submit', e => this.handleShortcutFormSubmit(e));
                 this.elements.clientForm.addEventListener('submit', e => this.handleClientFormSubmit(e));
                 this.elements.slaughterForm.addEventListener('submit', e => this.handleSlaughterFormSubmit(e));
 
                 this.elements.shortcutForm.elements['shortcut-frequency'].addEventListener('change', e => {
-                    if (e.target.value === 'fixed') {
-                        this.elements.shortcutDueDaySection.classList.remove('hidden');
-                    } else {
-                        this.elements.shortcutDueDaySection.classList.add('hidden');
-                    }
+                    this.elements.shortcutDueDaySection.classList.toggle('hidden', e.target.value !== 'fixed');
                 });
 
-                // Delegação de eventos para elementos dinâmicos
                 document.body.addEventListener('click', e => {
-                    if (!this.isInitialized) return; // Não executa se app não está pronto
+                    if (!this.isInitialized) return;
                     const button = e.target.closest('button, .shortcut-card');
                     if (!button) return;
                     const id = button.dataset.id;
@@ -1162,7 +1148,7 @@
                 const baseDueDate = new Date(dueDateValue + 'T12:00:00');
 
                 try {
-                    if (id) { // Edição de transação existente
+                    if (id) {
                         const docRef = doc(db, "users", this.userId, "transactions", id);
                         await updateDoc(docRef, {
                             description: form['transaction-description'].value,
@@ -1171,7 +1157,7 @@
                             type: form['transaction-type'].value,
                             status: form['transaction-status'].value
                         });
-                    } else { // Criação de nova(s) transação(ões)
+                    } else {
                         const totalAmount = amount;
                         const installmentAmount = parseFloat((totalAmount / installments).toFixed(2));
                         const firstInstallmentAmount = parseFloat((totalAmount - (installmentAmount * (installments - 1))).toFixed(2));
@@ -1242,8 +1228,6 @@
                         [
                             { text: 'Confirmar Exclusão', class: 'bg-red-600 hover:bg-red-700', action: async () => {
                                 try {
-                                    // *** INÍCIO DA NOVA LÓGICA ***
-                                    // Se a transação foi gerada automaticamente, regista-a como "omitida" para este mês.
                                     if (transaction.isAutoGenerated && transaction.shortcutId) {
                                         const yearMonth = `${transaction.dueDate.getFullYear()}-${String(transaction.dueDate.getMonth() + 1).padStart(2, '0')}`;
                                         const skippedDocId = `${transaction.shortcutId}_${yearMonth}`;
@@ -1252,9 +1236,6 @@
                                             period: yearMonth
                                         });
                                     }
-                                    // *** FIM DA NOVA LÓGICA ***
-
-                                    // Apaga a transação
                                     await deleteDoc(doc(db, "users", this.userId, "transactions", id));
                                     this.closeAllModals();
                                 } catch (error) {
@@ -1320,11 +1301,9 @@
                 
                 try {
                     if (id) {
-                        // Lógica de edição
                         const docRef = doc(db, "users", this.userId, "shortcuts", id);
                         await setDoc(docRef, shortcutData, { merge: true });
                     } else { 
-                        // Lógica de criação
                         const period = this.getPeriod(this.state.currentDateForPeriod);
                         const newShortcut = { 
                             ...shortcutData, 
@@ -1416,8 +1395,6 @@
                 }
             },
 
-            // **INÍCIO DA CORREÇÃO**
-            // Esta função agora apenas calcula e retorna a transação de saldo, sem modificar o estado principal.
             getPreviousPeriodBalanceTransaction() {
                 const currentPeriod = this.getPeriod(this.state.currentDateForPeriod);
                 const prevMonthDate = new Date(currentPeriod.start);
@@ -1432,11 +1409,11 @@
                 const realizedBalance = received - paid;
 
                 if (realizedBalance === 0) {
-                    return null; // Retorna nulo se não houver saldo a transportar
+                    return null;
                 }
 
                 return {
-                    id: `balance_${prevPeriod.start.getTime()}`, // ID único e previsível
+                    id: `balance_${prevPeriod.start.getTime()}`,
                     description: `Saldo Mês Anterior (${prevMonthDate.toLocaleDateString('pt-BR', {month: 'long'})})`,
                     amount: Math.abs(realizedBalance),
                     dueDate: currentPeriod.start,
@@ -1445,13 +1422,11 @@
                     isBalanceTransfer: true,
                 };
             },
-            // **FIM DA CORREÇÃO**
             
             // --- MÓDULO DE CONSULTORIA ---
             renderConsultingSummary() {
                 const period = this.getPeriod(this.state.currentDateForPeriod);
 
-                // Filtrar transações de receita que são de abates no período atual
                 const consultingTransactions = this.state.transactions.filter(t =>
                     t.slaughterId && t.type === 'revenue' && t.dueDate >= period.start && t.dueDate <= period.end
                 );
@@ -1474,7 +1449,6 @@
                 const totalPending = Array.from(pendingMap.values()).reduce((sum, val) => sum + val, 0);
                 const totalMonth = totalReceived + totalPending;
 
-                // Render KPIs de Consultoria
                 const kpis = [
                     { label: 'Recebido no Mês', value: totalReceived, color: 'green', icon: 'check-circle' },
                     { label: 'A Receber no Mês', value: totalPending, color: 'yellow', icon: 'clock' },
@@ -1493,7 +1467,6 @@
                     </div>
                 `).join('');
 
-                // Render "Recebido de"
                 this.elements.consultingReceivedFrom.innerHTML = receivedMap.size > 0
                     ? Array.from(receivedMap.entries()).sort((a, b) => a[0].localeCompare(b[0])).map(([name, amount]) => `
                         <div class="flex justify-between items-center text-gray-300 py-1 border-b border-gray-700/50">
@@ -1503,7 +1476,6 @@
                     `).join('')
                     : `<p class="text-gray-500 text-center py-4">Nenhuma receita de consultoria recebida neste período.</p>`;
 
-                // Render "A Receber de"
                 this.elements.consultingToReceiveFrom.innerHTML = pendingMap.size > 0
                     ? Array.from(pendingMap.entries()).sort((a, b) => a[0].localeCompare(b[0])).map(([name, amount]) => `
                         <div class="flex justify-between items-center text-gray-300 py-1 border-b border-gray-700/50">
