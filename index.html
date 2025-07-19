@@ -193,10 +193,34 @@
 
             <!-- Visão de Consultoria -->
             <div id="view-consultoria" class="hidden">
+                 <!-- NOVA SEÇÃO DE RESUMO -->
+                <section id="consulting-summary" class="mb-8">
+                    <h2 class="text-3xl font-bold text-white mb-6 text-center">Resumo de Consultoria (Mês Atual)</h2>
+                    <!-- KPIs de Consultoria -->
+                    <div id="consulting-kpi-dashboard" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">
+                        <!-- KPIs de consultoria serão injetados aqui -->
+                    </div>
+                    <!-- Detalhes de Pagamentos -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="bg-gray-800 p-4 md:p-6 rounded-lg shadow-xl">
+                            <h3 class="text-xl font-bold mb-4 text-green-400 flex items-center"><i data-lucide="check-circle" class="mr-2"></i>Recebido de</h3>
+                            <div id="consulting-received-from" class="space-y-3">
+                                <!-- Lista de recebidos será injetada aqui -->
+                            </div>
+                        </div>
+                        <div class="bg-gray-800 p-4 md:p-6 rounded-lg shadow-xl">
+                            <h3 class="text-xl font-bold mb-4 text-yellow-400 flex items-center"><i data-lucide="clock" class="mr-2"></i>A Receber de</h3>
+                            <div id="consulting-to-receive-from" class="space-y-3">
+                                <!-- Lista de pendentes será injetada aqui -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                  <!-- Visão da Lista de Clientes -->
                 <div id="client-list-view">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-3xl font-bold text-white">Clientes</h2>
+                    <div class="flex justify-between items-center mb-6 mt-12">
+                        <h2 class="text-3xl font-bold text-white">Gerenciar Clientes</h2>
                         <button id="add-client-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2 transition-colors">
                             <i data-lucide="user-plus"></i>
                             <span>Novo Cliente</span>
@@ -212,7 +236,7 @@
                     <header class="mb-6">
                         <button id="back-to-clients-btn" class="text-blue-400 hover:text-blue-300 mb-4 flex items-center space-x-2">
                             <i data-lucide="arrow-left"></i>
-                            <span>Voltar para Clientes</span>
+                            <span>Voltar para Consultoria</span>
                         </button>
                         <div class="flex justify-between items-center">
                             <div>
@@ -597,6 +621,10 @@
                 confirmationMessage: document.getElementById('confirmation-message'),
                 confirmationButtons: document.getElementById('confirmation-buttons'),
                 confirmationIcon: document.getElementById('confirmation-icon'),
+                // NOVOS ELEMENTOS PARA O RESUMO DE CONSULTORIA
+                consultingKpiDashboard: document.getElementById('consulting-kpi-dashboard'),
+                consultingReceivedFrom: document.getElementById('consulting-received-from'),
+                consultingToReceiveFrom: document.getElementById('consulting-to-receive-from'),
             },
             
             // --- CONSTANTES ---
@@ -776,7 +804,9 @@
                 if (!this.isInitialized) return;
 
                 await this.generateFixedTransactionsForCurrentPeriod();
-                this.updateBalanceTransactionForPeriod(this.state.currentDateForPeriod);
+                
+                // A chamada para updateBalanceTransactionForPeriod foi removida daqui para evitar a condição de corrida.
+                // O cálculo agora é feito diretamente nas funções de renderização.
 
                 switch (this.state.currentView) {
                     case 'dashboard':
@@ -786,6 +816,8 @@
                         this.renderTransactions();
                         break;
                     case 'consultoria-list':
+                        this.renderPeriodDisplay();
+                        this.renderConsultingSummary();
                         this.renderClientList();
                         break;
                     case 'consultoria-detail':
@@ -849,8 +881,16 @@
             // --- RENDERIZAÇÃO DE KPIs ---
             renderKPIs() {
                 const period = this.getPeriod(this.state.currentDateForPeriod);
-                const transactionsInPeriod = this.state.transactions.filter(t => t.dueDate >= period.start && t.dueDate <= period.end);
                 
+                // **INÍCIO DA CORREÇÃO**
+                // Pega as transações do estado e adiciona a transação de saldo do mês anterior
+                let transactionsInPeriod = this.state.transactions.filter(t => t.dueDate >= period.start && t.dueDate <= period.end);
+                const balanceTransaction = this.getPreviousPeriodBalanceTransaction();
+                if (balanceTransaction) {
+                    transactionsInPeriod.unshift(balanceTransaction);
+                }
+                // **FIM DA CORREÇÃO**
+
                 const overdueExpenses = this.state.transactions.filter(t => 
                     t.dueDate < period.start && 
                     t.status === 'pending' &&
@@ -933,11 +973,25 @@
 
             renderTransactions() {
                 const period = this.getPeriod(this.state.currentDateForPeriod);
-                let transactionsToRender = this.state.transactions
+                
+                // **INÍCIO DA CORREÇÃO**
+                // Cria uma lista de transações para renderizar, começando com a transação de saldo
+                let transactionsToRender = [];
+                const balanceTransaction = this.getPreviousPeriodBalanceTransaction();
+                if (balanceTransaction) {
+                    transactionsToRender.push(balanceTransaction);
+                }
+                
+                // Adiciona as outras transações do período
+                const periodTransactions = this.state.transactions
                     .filter(t => t.dueDate >= period.start && t.dueDate <= period.end)
                     .filter(t => t.description.toLowerCase().includes(this.state.filterText.toLowerCase()));
+
+                transactionsToRender.push(...periodTransactions);
+                // **FIM DA CORREÇÃO**
+
                 transactionsToRender.sort((a, b) => {
-                    if (a.isBalanceTransfer) return -1;
+                    if (a.isBalanceTransfer) return -1; // Garante que o saldo venha primeiro
                     if (b.isBalanceTransfer) return 1;
                     return a.dueDate - b.dueDate;
                 });
@@ -1325,31 +1379,26 @@
                     const dueDay = shortcut.dueDay || 1;
                     const transactionDate = new Date(period.start.getFullYear(), period.start.getMonth(), dueDay);
                     
-                    // 1. Verifica se a geração deve ser ignorada com base na data de criação
                     if (shortcut.createdAt && transactionDate < new Date(shortcut.createdAt.getFullYear(), shortcut.createdAt.getMonth(), 1)) {
                         continue; 
                     }
 
                     try {
-                        // 2. Verifica se esta transação foi intencionalmente omitida pelo utilizador
                         const yearMonth = `${transactionDate.getFullYear()}-${String(transactionDate.getMonth() + 1).padStart(2, '0')}`;
                         const skippedDocId = `${shortcut.id}_${yearMonth}`;
                         const skippedDocRef = doc(db, "users", this.userId, "skippedFixed", skippedDocId);
                         const skippedDocSnap = await getDoc(skippedDocRef);
 
                         if (skippedDocSnap.exists()) {
-                            // O utilizador apagou esta transação para este mês, então respeitamos a decisão e ignoramos.
                             continue;
                         }
 
-                        // 3. Verifica se a transação já existe no estado local (que é atualizado em tempo real)
                         const existingTransaction = this.state.transactions.find(t => 
                             t.shortcutId === shortcut.id &&
                             t.dueDate.getFullYear() === transactionDate.getFullYear() &&
                             t.dueDate.getMonth() === transactionDate.getMonth()
                         );
                         
-                        // 4. Se a transação não existir (nem na base de dados nem foi omitida), cria-a.
                         if (!existingTransaction) {
                             await addDoc(collection(db, "users", this.userId, "transactions"), {
                                 description: shortcut.name, 
@@ -1358,7 +1407,7 @@
                                 type: shortcut.type, 
                                 status: 'pending', 
                                 shortcutId: shortcut.id, 
-                                isAutoGenerated: true // Flag importante
+                                isAutoGenerated: true
                             });
                         }
                     } catch (error) {
@@ -1367,9 +1416,10 @@
                 }
             },
 
-            // A lógica de saldo continua no cliente pois é mais performático
-            updateBalanceTransactionForPeriod(dateForPeriod) {
-                const currentPeriod = this.getPeriod(dateForPeriod);
+            // **INÍCIO DA CORREÇÃO**
+            // Esta função agora apenas calcula e retorna a transação de saldo, sem modificar o estado principal.
+            getPreviousPeriodBalanceTransaction() {
+                const currentPeriod = this.getPeriod(this.state.currentDateForPeriod);
                 const prevMonthDate = new Date(currentPeriod.start);
                 prevMonthDate.setDate(0); 
                 const prevPeriod = this.getPeriod(prevMonthDate);
@@ -1381,38 +1431,89 @@
                 const paid = prevPeriodTransactions.filter(t => t.type === 'expense' && t.status === 'paid').reduce((sum, t) => sum + t.amount, 0);
                 const realizedBalance = received - paid;
 
-                const existingTransferIndex = this.state.transactions.findIndex(t =>
-                    t.isBalanceTransfer &&
-                    t.dueDate.getFullYear() === currentPeriod.start.getFullYear() &&
-                    t.dueDate.getMonth() === currentPeriod.start.getMonth()
-                );
-
-                const newAmount = Math.abs(realizedBalance);
-                const newType = realizedBalance >= 0 ? 'revenue' : 'expense';
-
-                if (existingTransferIndex > -1) {
-                    const existingTransfer = this.state.transactions[existingTransferIndex];
-                    if (realizedBalance === 0) {
-                        this.state.transactions.splice(existingTransferIndex, 1);
-                    } else if (existingTransfer.amount !== newAmount || existingTransfer.type !== newType) {
-                        existingTransfer.amount = newAmount;
-                        existingTransfer.type = newType;
-                        existingTransfer.description = `Saldo Mês Anterior (${prevMonthDate.toLocaleDateString('pt-BR', {month: 'long'})})`;
-                    }
-                } else if (realizedBalance !== 0) {
-                    this.state.transactions.push({
-                        id: crypto.randomUUID(), // Este ID é apenas para o estado local
-                        description: `Saldo Mês Anterior (${prevMonthDate.toLocaleDateString('pt-BR', {month: 'long'})})`,
-                        amount: newAmount,
-                        dueDate: currentPeriod.start,
-                        type: newType,
-                        status: 'paid',
-                        isBalanceTransfer: true,
-                    });
+                if (realizedBalance === 0) {
+                    return null; // Retorna nulo se não houver saldo a transportar
                 }
+
+                return {
+                    id: `balance_${prevPeriod.start.getTime()}`, // ID único e previsível
+                    description: `Saldo Mês Anterior (${prevMonthDate.toLocaleDateString('pt-BR', {month: 'long'})})`,
+                    amount: Math.abs(realizedBalance),
+                    dueDate: currentPeriod.start,
+                    type: realizedBalance >= 0 ? 'revenue' : 'expense',
+                    status: 'paid',
+                    isBalanceTransfer: true,
+                };
             },
+            // **FIM DA CORREÇÃO**
             
             // --- MÓDULO DE CONSULTORIA ---
+            renderConsultingSummary() {
+                const period = this.getPeriod(this.state.currentDateForPeriod);
+
+                // Filtrar transações de receita que são de abates no período atual
+                const consultingTransactions = this.state.transactions.filter(t =>
+                    t.slaughterId && t.type === 'revenue' && t.dueDate >= period.start && t.dueDate <= period.end
+                );
+
+                const receivedMap = new Map();
+                const pendingMap = new Map();
+
+                consultingTransactions.forEach(t => {
+                    const slaughter = this.state.slaughters.find(s => s.id === t.slaughterId);
+                    if (!slaughter) return;
+                    const client = this.state.clients.find(c => c.id === slaughter.clientId);
+                    if (!client) return;
+
+                    const mapToUpdate = t.status === 'paid' ? receivedMap : pendingMap;
+                    const currentTotal = mapToUpdate.get(client.name) || 0;
+                    mapToUpdate.set(client.name, currentTotal + t.amount);
+                });
+
+                const totalReceived = Array.from(receivedMap.values()).reduce((sum, val) => sum + val, 0);
+                const totalPending = Array.from(pendingMap.values()).reduce((sum, val) => sum + val, 0);
+                const totalMonth = totalReceived + totalPending;
+
+                // Render KPIs de Consultoria
+                const kpis = [
+                    { label: 'Recebido no Mês', value: totalReceived, color: 'green', icon: 'check-circle' },
+                    { label: 'A Receber no Mês', value: totalPending, color: 'yellow', icon: 'clock' },
+                    { label: 'Total Consultoria (Mês)', value: totalMonth, color: 'blue', icon: 'bar-chart-2' },
+                ];
+
+                this.elements.consultingKpiDashboard.innerHTML = kpis.map(kpi => `
+                    <div class="bg-gray-800 p-4 rounded-lg shadow-lg flex items-center space-x-4 transition-transform transform hover:scale-105">
+                        <div class="p-3 rounded-full bg-${kpi.color}-500 bg-opacity-20 text-${kpi.color}-400">
+                            <i data-lucide="${kpi.icon}" class="w-7 h-7"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">${kpi.label}</p>
+                            <p class="text-2xl font-bold text-white">${this.formatCurrency(kpi.value)}</p>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Render "Recebido de"
+                this.elements.consultingReceivedFrom.innerHTML = receivedMap.size > 0
+                    ? Array.from(receivedMap.entries()).sort((a, b) => a[0].localeCompare(b[0])).map(([name, amount]) => `
+                        <div class="flex justify-between items-center text-gray-300 py-1 border-b border-gray-700/50">
+                            <span>${name}</span>
+                            <span class="font-semibold text-green-400">${this.formatCurrency(amount)}</span>
+                        </div>
+                    `).join('')
+                    : `<p class="text-gray-500 text-center py-4">Nenhuma receita de consultoria recebida neste período.</p>`;
+
+                // Render "A Receber de"
+                this.elements.consultingToReceiveFrom.innerHTML = pendingMap.size > 0
+                    ? Array.from(pendingMap.entries()).sort((a, b) => a[0].localeCompare(b[0])).map(([name, amount]) => `
+                        <div class="flex justify-between items-center text-gray-300 py-1 border-b border-gray-700/50">
+                            <span>${name}</span>
+                            <span class="font-semibold text-yellow-400">${this.formatCurrency(amount)}</span>
+                        </div>
+                    `).join('')
+                    : `<p class="text-gray-500 text-center py-4">Nenhum valor de consultoria pendente para este período.</p>`;
+            },
+
             renderClientList() {
                 const container = this.elements.clientListContainer;
                 if(this.state.clients.length === 0){
@@ -1562,7 +1663,8 @@
                 };
                 
                 try {
-                    // Remove transações antigas vinculadas ANTES de criar/atualizar
+                    const slaughterIdToUse = id || doc(collection(db, "users", this.userId, "slaughters")).id;
+                    
                     if (id) {
                         const q = query(collection(db, "users", this.userId, "transactions"), where("slaughterId", "==", id));
                         const oldTransactions = await getDocs(q);
@@ -1570,27 +1672,25 @@
                             await deleteDoc(doc(db, "users", this.userId, "transactions", docSnap.id));
                         }
                     }
-
-                    const slaughterId = id || crypto.randomUUID(); // Usa ID existente ou cria um novo
                     
-                    // Cria novas transações financeiras vinculadas ao abate
                     const mainRevenue = (slaughterData.heads * client.rate) + slaughterData.revenueTravel;
-                    await addDoc(collection(db, "users", this.userId, "transactions"), {
-                        description: `Abate - ${client.name}`, amount: mainRevenue, dueDate: slaughterData.date, type: 'revenue', status: 'pending', slaughterId: slaughterId
-                    });
+                    if (mainRevenue > 0) {
+                        await addDoc(collection(db, "users", this.userId, "transactions"), {
+                            description: `Abate - ${client.name}`, amount: mainRevenue, dueDate: slaughterData.date, type: 'revenue', status: 'pending', slaughterId: slaughterIdToUse
+                        });
+                    }
                     if (slaughterData.costTravel > 0) {
                         await addDoc(collection(db, "users", this.userId, "transactions"), {
-                           description: `Custo Deslocamento - ${client.name}`, amount: slaughterData.costTravel, dueDate: slaughterData.date, type: 'expense', status: 'pending', slaughterId: slaughterId
+                           description: `Custo Deslocamento - ${client.name}`, amount: slaughterData.costTravel, dueDate: slaughterData.date, type: 'expense', status: 'pending', slaughterId: slaughterIdToUse
                         });
                     }
                     if (slaughterData.costDaily > 0) {
                         await addDoc(collection(db, "users", this.userId, "transactions"), {
-                           description: `Custo Diarista - ${client.name}`, amount: slaughterData.costDaily, dueDate: slaughterData.date, type: 'expense', status: 'pending', slaughterId: slaughterId
+                           description: `Custo Diarista - ${client.name}`, amount: slaughterData.costDaily, dueDate: slaughterData.date, type: 'expense', status: 'pending', slaughterId: slaughterIdToUse
                         });
                     }
                     
-                    // Salva o registro de abate (cria um novo ou atualiza)
-                    await setDoc(doc(db, "users", this.userId, "slaughters", slaughterId), slaughterData);
+                    await setDoc(doc(db, "users", this.userId, "slaughters", slaughterIdToUse), slaughterData);
 
                     this.closeAllModals();
 
