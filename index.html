@@ -59,10 +59,10 @@
         }
         /* Previne seleção de texto durante o arraste */
         .select-none {
-           user-select: none;
-           -webkit-user-select: none;
-           -moz-user-select: none;
-           -ms-user-select: none;
+          user-select: none;
+          -webkit-user-select: none;
+          -moz-user-select: none;
+          -ms-user-select: none;
         }
     </style>
 </head>
@@ -116,10 +116,10 @@
         <header class="text-center mb-6">
              <div class="flex justify-end mb-4">
                  <button id="logout-btn" class="flex items-center space-x-2 text-red-400 hover:text-red-300 transition-colors">
-                    <i data-lucide="log-out" class="w-5 h-5"></i>
-                    <span>Sair</span>
-                </button>
-            </div>
+                     <i data-lucide="log-out" class="w-5 h-5"></i>
+                     <span>Sair</span>
+                 </button>
+             </div>
             <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">Centro de Comando</h1>
             <div class="flex items-center justify-center space-x-4 mt-4">
                 <button id="prev-period-btn" class="p-2 rounded-md bg-gray-700 hover:bg-gray-600 transition-colors">
@@ -134,9 +134,11 @@
 
         <!-- Navegação por Abas -->
         <nav class="mb-8 border-b border-gray-700">
-            <div class="flex justify-center space-x-8">
-                <button id="tab-dashboard" class="tab-button text-lg font-medium py-3 border-b-2 border-transparent transition-colors">Financeiro</button>
-                <button id="tab-consultoria" class="tab-button text-lg font-medium py-3 border-b-2 border-transparent transition-colors">Consultoria</button>
+            <div class="flex justify-center space-x-2 md:space-x-8">
+                <button id="tab-dashboard" class="tab-button text-base md:text-lg font-medium py-3 px-2 md:px-4 border-b-2 border-transparent transition-colors">Dashboard</button>
+                <button id="tab-receitas" class="tab-button text-base md:text-lg font-medium py-3 px-2 md:px-4 border-b-2 border-transparent transition-colors">Receitas</button>
+                <button id="tab-despesas" class="tab-button text-base md:text-lg font-medium py-3 px-2 md:px-4 border-b-2 border-transparent transition-colors">Despesas</button>
+                <button id="tab-consultoria" class="tab-button text-base md:text-lg font-medium py-3 px-2 md:px-4 border-b-2 border-transparent transition-colors">Consultoria</button>
             </div>
         </nav>
 
@@ -165,41 +167,71 @@
                         </div>
                     </div>
                      <div class="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
-                        <button id="add-shortcut-btn" class="flex-1 w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2">
-                            <i data-lucide="star" class="w-5 h-5"></i>
-                            <span>Novo Atalho</span>
-                        </button>
-                        <button id="add-transaction-btn" class="flex-1 w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2">
-                            <i data-lucide="plus-circle" class="w-5 h-5"></i>
-                            <span>Nova Transação</span>
-                        </button>
-                    </div>
+                         <button id="add-shortcut-btn" class="flex-1 w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2">
+                             <i data-lucide="star" class="w-5 h-5"></i>
+                             <span>Novo Atalho</span>
+                         </button>
+                         <button id="add-transaction-btn" class="flex-1 w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2">
+                             <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                             <span>Nova Transação</span>
+                         </button>
+                     </div>
                 </section>
+            </div>
 
-                <!-- Lista de Transações -->
-                <section class="bg-gray-800 p-4 md:p-6 rounded-lg shadow-xl">
+            <!-- Visão de Receitas -->
+            <div id="view-receitas" class="hidden">
+                 <section class="bg-gray-800 p-4 md:p-6 rounded-lg shadow-xl">
                     <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
-                        <h3 class="text-2xl font-bold text-white">Transações do Período</h3>
+                        <h3 class="text-2xl font-bold text-white">Receitas do Período</h3>
                         <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                             <div class="relative w-full sm:w-64">
                                 <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
-                                <input type="text" id="search-input" placeholder="Buscar por descrição..." class="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <input type="text" id="search-input-revenue" placeholder="Buscar por descrição..." class="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
                             <div class="relative w-full sm:w-48">
                                 <i data-lucide="dollar-sign" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
-                                <input type="number" id="search-amount-input" placeholder="Buscar por valor..." class="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <input type="number" id="search-amount-input-revenue" placeholder="Buscar por valor..." class="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
                         </div>
                     </div>
-                    <div id="transactions-list" class="overflow-x-auto">
-                        <!-- Lista de transações será injetada aqui -->
+                    <div id="revenue-list" class="overflow-x-auto">
+                        <!-- Lista de receitas será injetada aqui -->
+                    </div>
+                    <div id="revenue-summary" class="mt-4 pt-4 border-t border-gray-700">
+                        <!-- Resumo/Total da receita será injetado aqui -->
+                    </div>
+                </section>
+            </div>
+
+            <!-- Visão de Despesas -->
+            <div id="view-despesas" class="hidden">
+                 <section class="bg-gray-800 p-4 md:p-6 rounded-lg shadow-xl">
+                    <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+                        <h3 class="text-2xl font-bold text-white">Despesas do Período</h3>
+                        <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                            <div class="relative w-full sm:w-64">
+                                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+                                <input type="text" id="search-input-expense" placeholder="Buscar por descrição..." class="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div class="relative w-full sm:w-48">
+                                <i data-lucide="dollar-sign" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+                                <input type="number" id="search-amount-input-expense" placeholder="Buscar por valor..." class="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+                    <div id="expense-list" class="overflow-x-auto">
+                        <!-- Lista de despesas será injetada aqui -->
+                    </div>
+                    <div id="expense-summary" class="mt-4 pt-4 border-t border-gray-700">
+                        <!-- Resumo/Total da despesa será injetado aqui -->
                     </div>
                 </section>
             </div>
 
             <!-- Visão de Consultoria -->
             <div id="view-consultoria" class="hidden">
-                 <!-- NOVA SEÇÃO DE RESUMO -->
+                 <!-- SEÇÃO DE RESUMO -->
                 <section id="consulting-summary" class="mb-8">
                     <h2 class="text-3xl font-bold text-white mb-6 text-center">Resumo de Consultoria (Mês Atual)</h2>
                     <!-- KPIs de Consultoria -->
@@ -356,7 +388,7 @@
                     <div class="mb-6">
                         <label class="block mb-2 text-sm font-medium text-gray-300">Ícone</label>
                         <div id="shortcut-icon-selection" class="grid grid-cols-6 gap-2 bg-gray-700 p-2 rounded-lg">
-                           <!-- Ícones serão injetados aqui -->
+                            <!-- Ícones serão injetados aqui -->
                         </div>
                         <input type="hidden" id="shortcut-icon" name="shortcut-icon" required>
                     </div>
@@ -433,7 +465,7 @@
                   <p id="confirmation-message">Você tem certeza que deseja continuar?</p>
                 </div>
                 <div id="confirmation-buttons" class="mt-6 flex flex-col sm:flex-row justify-center gap-4">
-                  <!-- Botões são inseridos dinamicamente aqui -->
+                    <!-- Botões são inseridos dinamicamente aqui -->
                 </div>
             </div>
         </div>
@@ -478,7 +510,7 @@
             apiKey: "AIzaSyAKJrzbvJkdb6-Ad54qgYFR_c_VxkByaKY",
             authDomain: "financeiros-999ea.firebaseapp.com",
             projectId: "financeiros-999ea",
-            storageBucket: "financeiros-999ea.firebasestorage.app",
+            storageBucket: "financeiros-999ea.appspot.com",
             messagingSenderId: "677895667796",
             appId: "1:677895667796:web:7bb3d1c2ef9715cc432dc1",
             measurementId: "G-LBFW65MQN1"
@@ -582,8 +614,10 @@
                 shortcuts: [],
                 clients: [],
                 slaughters: [],
-                filterText: '',
-                filterAmount: null,
+                filterTextRevenue: '',
+                filterAmountRevenue: null,
+                filterTextExpense: '',
+                filterAmountExpense: null,
             },
 
             // --- ELEMENTOS DO DOM ---
@@ -594,13 +628,22 @@
                 kpiDashboard: document.getElementById('kpi-dashboard'),
                 revenueShortcuts: document.getElementById('revenue-shortcuts'),
                 expenseShortcuts: document.getElementById('expense-shortcuts'),
-                transactionsList: document.getElementById('transactions-list'),
-                searchInput: document.getElementById('search-input'),
-                searchAmountInput: document.getElementById('search-amount-input'),
+                revenueList: document.getElementById('revenue-list'),
+                expenseList: document.getElementById('expense-list'),
+                revenueSummary: document.getElementById('revenue-summary'),
+                expenseSummary: document.getElementById('expense-summary'),
+                searchInputRevenue: document.getElementById('search-input-revenue'),
+                searchAmountInputRevenue: document.getElementById('search-amount-input-revenue'),
+                searchInputExpense: document.getElementById('search-input-expense'),
+                searchAmountInputExpense: document.getElementById('search-amount-input-expense'),
                 clockDisplay: document.getElementById('clock-display'),
                 viewDashboard: document.getElementById('view-dashboard'),
+                viewReceitas: document.getElementById('view-receitas'),
+                viewDespesas: document.getElementById('view-despesas'),
                 viewConsultoria: document.getElementById('view-consultoria'),
                 tabDashboard: document.getElementById('tab-dashboard'),
+                tabReceitas: document.getElementById('tab-receitas'),
+                tabDespesas: document.getElementById('tab-despesas'),
                 tabConsultoria: document.getElementById('tab-consultoria'),
                 clientListView: document.getElementById('client-list-view'),
                 slaughterDetailView: document.getElementById('slaughter-detail-view'),
@@ -791,20 +834,24 @@
 
                 await this.generateFixedTransactionsForCurrentPeriod();
                 
+                this.renderPeriodDisplay(); // Sempre renderiza o período
+
                 switch (this.state.currentView) {
                     case 'dashboard':
-                        this.renderPeriodDisplay();
                         this.renderKPIs();
                         this.renderShortcuts();
-                        this.renderTransactions();
+                        break;
+                    case 'receitas':
+                        this.renderRevenueList();
+                        break;
+                    case 'despesas':
+                        this.renderExpenseList();
                         break;
                     case 'consultoria-list':
-                        this.renderPeriodDisplay();
                         this.renderConsultingSummary();
                         this.renderClientList();
                         break;
                     case 'consultoria-detail':
-                         this.renderPeriodDisplay();
                         this.renderSlaughterDetail();
                         break;
                 }
@@ -815,26 +862,43 @@
                 this.state.currentView = view;
                 this.state.currentClientId = clientId;
 
+                // Oculta todas as views principais
                 this.elements.viewDashboard.classList.add('hidden');
+                this.elements.viewReceitas.classList.add('hidden');
+                this.elements.viewDespesas.classList.add('hidden');
                 this.elements.viewConsultoria.classList.add('hidden');
+                
+                // Oculta sub-views de consultoria
                 this.elements.clientListView.classList.add('hidden');
                 this.elements.slaughterDetailView.classList.add('hidden');
 
+                // Reseta o estado ativo de todas as abas
                 this.elements.tabDashboard.classList.remove('active');
+                this.elements.tabReceitas.classList.remove('active');
+                this.elements.tabDespesas.classList.remove('active');
                 this.elements.tabConsultoria.classList.remove('active');
 
+                // Mostra a view correta e ativa a aba correspondente
                 switch (view) {
                     case 'dashboard':
                         this.elements.viewDashboard.classList.remove('hidden');
                         this.elements.tabDashboard.classList.add('active');
                         break;
+                    case 'receitas':
+                        this.elements.viewReceitas.classList.remove('hidden');
+                        this.elements.tabReceitas.classList.add('active');
+                        break;
+                    case 'despesas':
+                        this.elements.viewDespesas.classList.remove('hidden');
+                        this.elements.tabDespesas.classList.add('active');
+                        break;
                     case 'consultoria-list':
                         this.elements.viewConsultoria.classList.remove('hidden');
                         this.elements.clientListView.classList.remove('hidden');
-                         this.elements.tabConsultoria.classList.add('active');
+                        this.elements.tabConsultoria.classList.add('active');
                         break;
                     case 'consultoria-detail':
-                         this.elements.viewConsultoria.classList.remove('hidden');
+                        this.elements.viewConsultoria.classList.remove('hidden');
                         this.elements.slaughterDetailView.classList.remove('hidden');
                         this.elements.tabConsultoria.classList.add('active');
                         break;
@@ -861,20 +925,12 @@
                 this.elements.periodDisplay.textContent = `${period.start.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}`;
             },
 
-            // --- RENDERIZAÇÃO DE KPIs ---
+            // --- RENDERIZAÇÃO DE COMPONENTES ---
             renderKPIs() {
                 const period = this.getPeriod(this.state.currentDateForPeriod);
-                
-                let transactionsInPeriod = this.state.transactions.filter(t => t.dueDate >= period.start && t.dueDate <= period.end);
-                const balanceTransaction = this.getPreviousPeriodBalanceTransaction();
-                if (balanceTransaction) {
-                    transactionsInPeriod.unshift(balanceTransaction);
-                }
-
+                const transactionsInPeriod = this.state.transactions.filter(t => t.dueDate >= period.start && t.dueDate <= period.end);
                 const overdueExpenses = this.state.transactions.filter(t => 
-                    t.dueDate < period.start && 
-                    t.status === 'pending' &&
-                    t.type === 'expense'
+                    t.dueDate < period.start && t.status === 'pending' && t.type === 'expense'
                 ).reduce((sum, t) => sum + t.amount, 0);
 
                 const received = transactionsInPeriod.filter(t => t.type === 'revenue' && t.status === 'paid').reduce((sum, t) => sum + t.amount, 0);
@@ -896,31 +952,13 @@
 
                 this.elements.kpiDashboard.innerHTML = kpis.map(kpi => {
                     let valueHtml = `<p class="text-2xl font-bold text-white">${this.formatCurrency(kpi.value)}</p>`;
-                    
                     if (kpi.label === 'A Pagar' && kpi.overdueValue > 0) {
-                        valueHtml = `
-                            <p class="text-2xl font-bold text-white" title="No mês: ${this.formatCurrency(kpi.value)} | Atrasado: ${this.formatCurrency(kpi.overdueValue)}">
-                                ${this.formatCurrency(kpi.value)} 
-                                <span class="text-base font-medium text-red-400">(+${this.formatCurrency(kpi.overdueValue)})</span>
-                            </p>
-                        `;
+                        valueHtml = `<p class="text-2xl font-bold text-white" title="No mês: ${this.formatCurrency(kpi.value)} | Atrasado: ${this.formatCurrency(kpi.overdueValue)}">${this.formatCurrency(kpi.value)} <span class="text-base font-medium text-red-400">(+${this.formatCurrency(kpi.overdueValue)})</span></p>`;
                     }
-
-                    return `
-                        <div class="bg-gray-800 p-4 rounded-lg shadow-lg flex items-center space-x-4 transition-transform transform hover:scale-105" id="kpi-${kpi.label.replace(' ', '-')}">
-                            <div class="p-3 rounded-full bg-${kpi.color}-500 bg-opacity-20 text-${kpi.color}-400">
-                                <i data-lucide="${kpi.icon}" class="w-7 h-7"></i>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-400">${kpi.label}</p>
-                                ${valueHtml}
-                            </div>
-                        </div>
-                    `
+                    return `<div class="bg-gray-800 p-4 rounded-lg shadow-lg flex items-center space-x-4 transition-transform transform hover:scale-105" id="kpi-${kpi.label.replace(' ', '-')}"><div class="p-3 rounded-full bg-${kpi.color}-500 bg-opacity-20 text-${kpi.color}-400"><i data-lucide="${kpi.icon}" class="w-7 h-7"></i></div><div><p class="text-sm text-gray-400">${kpi.label}</p>${valueHtml}</div></div>`;
                 }).join('');
             },
 
-            // --- RENDERIZAÇÃO DE ATALHOS E TRANSAÇÕES ---
             renderShortcuts() {
                 this.elements.revenueShortcuts.innerHTML = '';
                 this.elements.expenseShortcuts.innerHTML = '';
@@ -928,21 +966,10 @@
                 this.state.shortcuts.forEach(shortcut => {
                     let displayValue = this.formatCurrency(shortcut.defaultValue);
                     if (shortcut.frequency === 'variable') {
-                        const accumulated = this.state.transactions
-                            .filter(t => t.shortcutId === shortcut.id && t.dueDate >= period.start && t.dueDate <= period.end)
-                            .reduce((sum, t) => sum + t.amount, 0);
+                        const accumulated = this.state.transactions.filter(t => t.shortcutId === shortcut.id && t.dueDate >= period.start && t.dueDate <= period.end).reduce((sum, t) => sum + t.amount, 0);
                         displayValue = this.formatCurrency(accumulated);
                     }
-                    const shortcutCard = `
-                        <div data-shortcut-id="${shortcut.id}" class="shortcut-card bg-gray-700 p-3 rounded-lg flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-600 transition-colors relative group">
-                            <div class="absolute top-1 right-1 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button class="edit-shortcut-btn p-1 rounded-full bg-gray-800 hover:bg-blue-600" data-id="${shortcut.id}"><i data-lucide="edit-2" class="w-3 h-3 pointer-events-none"></i></button>
-                                <button class="delete-shortcut-btn p-1 rounded-full bg-gray-800 hover:bg-red-600" data-id="${shortcut.id}"><i data-lucide="trash-2" class="w-3 h-3 pointer-events-none"></i></button>
-                            </div>
-                            <i data-lucide="${shortcut.icon}" class="w-8 h-8 mb-2 ${shortcut.type === 'revenue' ? 'text-green-400' : 'text-red-400'}"></i>
-                            <p class="text-sm font-medium truncate w-full" title="${shortcut.name}">${shortcut.name}</p>
-                            <p class="text-xs text-gray-400">${displayValue}</p>
-                        </div>`;
+                    const shortcutCard = `<div data-shortcut-id="${shortcut.id}" class="shortcut-card bg-gray-700 p-3 rounded-lg flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-600 transition-colors relative group"><div class="absolute top-1 right-1 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity"><button class="edit-shortcut-btn p-1 rounded-full bg-gray-800 hover:bg-blue-600" data-id="${shortcut.id}"><i data-lucide="edit-2" class="w-3 h-3 pointer-events-none"></i></button><button class="delete-shortcut-btn p-1 rounded-full bg-gray-800 hover:bg-red-600" data-id="${shortcut.id}"><i data-lucide="trash-2" class="w-3 h-3 pointer-events-none"></i></button></div><i data-lucide="${shortcut.icon}" class="w-8 h-8 mb-2 ${shortcut.type === 'revenue' ? 'text-green-400' : 'text-red-400'}"></i><p class="text-sm font-medium truncate w-full" title="${shortcut.name}">${shortcut.name}</p><p class="text-xs text-gray-400">${displayValue}</p></div>`;
                     if (shortcut.type === 'revenue') {
                         this.elements.revenueShortcuts.innerHTML += shortcutCard;
                     } else {
@@ -951,45 +978,50 @@
                 });
             },
 
-            renderTransactions() {
+            renderRevenueList() {
+                this.renderTransactionList('revenue', this.elements.revenueList, this.state.filterTextRevenue, this.state.filterAmountRevenue);
+            },
+            
+            renderExpenseList() {
+                this.renderTransactionList('expense', this.elements.expenseList, this.state.filterTextExpense, this.state.filterAmountExpense);
+            },
+
+            renderTransactionList(type, container, filterText, filterAmount) {
                 const period = this.getPeriod(this.state.currentDateForPeriod);
                 
-                let periodTransactions = this.state.transactions
-                    .filter(t => t.dueDate >= period.start && t.dueDate <= period.end);
+                let transactions = this.state.transactions
+                    .filter(t => t.type === type && t.dueDate >= period.start && t.dueDate <= period.end);
 
-                // Aplicar filtros
-                if (this.state.filterText) {
-                    periodTransactions = periodTransactions.filter(t => 
-                        t.description.toLowerCase().includes(this.state.filterText.toLowerCase())
+                if (filterText) {
+                    transactions = transactions.filter(t => 
+                        t.description.toLowerCase().includes(filterText.toLowerCase())
                     );
                 }
-                if (this.state.filterAmount !== null && !isNaN(this.state.filterAmount)) {
-                     periodTransactions = periodTransactions.filter(t => t.amount === this.state.filterAmount);
+                if (filterAmount !== null && !isNaN(filterAmount)) {
+                     transactions = transactions.filter(t => t.amount === filterAmount);
                 }
                 
-                let transactionsToRender = [...periodTransactions];
+                transactions.sort((a, b) => a.dueDate - b.dueDate);
 
-                const balanceTransaction = this.getPreviousPeriodBalanceTransaction();
-                const noFiltersActive = !this.state.filterText && (this.state.filterAmount === null || isNaN(this.state.filterAmount));
-                
-                if (balanceTransaction && noFiltersActive) {
-                    transactionsToRender.unshift(balanceTransaction);
-                }
+                const totalAmount = transactions.reduce((sum, t) => sum + t.amount, 0);
+                const summaryContainer = type === 'revenue' ? this.elements.revenueSummary : this.elements.expenseSummary;
 
-                transactionsToRender.sort((a, b) => {
-                    if (a.isBalanceTransfer) return -1;
-                    if (b.isBalanceTransfer) return 1;
-                    return a.dueDate - b.dueDate;
-                });
-
-                if (transactionsToRender.length === 0) {
-                    this.elements.transactionsList.innerHTML = `<div class="text-center py-8 text-gray-500"><i data-lucide="inbox" class="w-12 h-12 mx-auto mb-2"></i><p>Nenhuma transação encontrada.</p></div>`;
+                if (transactions.length === 0) {
+                    container.innerHTML = `<div class="text-center py-8 text-gray-500"><i data-lucide="inbox" class="w-12 h-12 mx-auto mb-2"></i><p>Nenhuma transação encontrada.</p></div>`;
+                    summaryContainer.innerHTML = '';
                 } else {
-                    this.elements.transactionsList.innerHTML = `
+                    container.innerHTML = `
                         <div class="hidden md:grid grid-cols-12 gap-4 font-bold p-2 text-gray-400 text-sm">
-                            <div class="col-span-1"></div><div class="col-span-4">Descrição</div><div class="col-span-2 text-right">Valor</div><div class="col-span-2 text-center">Vencimento</div><div class="col-span-1 text-center">Tipo</div><div class="col-span-2 text-right">Ações</div>
+                            <div class="col-span-1"></div><div class="col-span-5">Descrição</div><div class="col-span-2 text-right">Valor</div><div class="col-span-2 text-center">Vencimento</div><div class="col-span-2 text-right">Ações</div>
                         </div>
-                        ${transactionsToRender.map(t => this.createTransactionRow(t)).join('')}`;
+                        ${transactions.map(t => this.createTransactionRow(t)).join('')}`;
+                    
+                    summaryContainer.innerHTML = `
+                        <div class="flex justify-end items-center text-lg pr-2">
+                            <span class="font-bold text-gray-400 mr-4">Total do Período:</span>
+                            <span class="font-bold ${type === 'revenue' ? 'text-green-400' : 'text-red-400'}">${this.formatCurrency(totalAmount)}</span>
+                        </div>
+                    `;
                 }
                 lucide.createIcons();
             },
@@ -1000,27 +1032,17 @@
                 const descriptionClass = isPaid ? 'line-through text-gray-500' : 'text-gray-200';
                 const valueClass = isPaid ? 'line-through text-gray-500' : typeColor;
                 
-                const isAutoTransfer = t.isBalanceTransfer === true;
-
-                const actionButtonsHTML = isAutoTransfer
-                    ? `<div class="flex items-center justify-end pr-2" title="Transação automática de saldo"><i data-lucide="lock" class="w-5 h-5 text-gray-500"></i></div>`
-                    : `<button class="edit-transaction-btn p-2 text-gray-400 hover:text-blue-400 rounded-full hover:bg-gray-600 transition-colors" data-id="${t.id}"><i data-lucide="edit-2" class="w-4 h-4 pointer-events-none"></i></button>
-                       <button class="delete-transaction-btn p-2 text-gray-400 hover:text-red-400 rounded-full hover:bg-gray-600 transition-colors" data-id="${t.id}"><i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i></button>`;
+                const actionButtonsHTML = `<button class="edit-transaction-btn p-2 text-gray-400 hover:text-blue-400 rounded-full hover:bg-gray-600 transition-colors" data-id="${t.id}"><i data-lucide="edit-2" class="w-4 h-4 pointer-events-none"></i></button><button class="delete-transaction-btn p-2 text-gray-400 hover:text-red-400 rounded-full hover:bg-gray-600 transition-colors" data-id="${t.id}"><i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i></button>`;
 
                 return `
-                    <div class="grid grid-cols-2 md:grid-cols-12 gap-4 items-center p-3 rounded-lg ${isAutoTransfer ? 'bg-gray-800/50' : 'hover:bg-gray-700/50'} border-b border-gray-700 last:border-b-0">
+                    <div class="grid grid-cols-2 md:grid-cols-12 gap-4 items-center p-3 rounded-lg hover:bg-gray-700/50 border-b border-gray-700 last:border-b-0">
                         <div class="md:col-span-1 flex items-center justify-start">
-                            <input type="checkbox" data-id="${t.id}" class="transaction-status-check h-5 w-5 rounded bg-gray-600 border-gray-500 text-blue-500 focus:ring-blue-600 cursor-pointer" 
-                            ${isPaid ? 'checked' : ''} 
-                            ${isAutoTransfer ? 'disabled' : ''}>
+                            <input type="checkbox" data-id="${t.id}" class="transaction-status-check h-5 w-5 rounded bg-gray-600 border-gray-500 text-blue-500 focus:ring-blue-600 cursor-pointer" ${isPaid ? 'checked' : ''}>
                         </div>
-                        <div class="md:col-span-4 flex items-center space-x-2"><span class="md:hidden font-bold text-gray-400">Desc:</span><p class="${descriptionClass} font-medium">${t.description}</p></div>
+                        <div class="md:col-span-5 flex items-center space-x-2"><span class="md:hidden font-bold text-gray-400">Desc:</span><p class="${descriptionClass} font-medium">${t.description}</p></div>
                         <div class="md:col-span-2 flex justify-between md:justify-end items-center"><span class="md:hidden font-bold text-gray-400">Valor:</span><p class="${valueClass} font-bold text-right">${this.formatCurrency(t.amount)}</p></div>
                         <div class="md:col-span-2 flex justify-between md:justify-center items-center"><span class="md:hidden font-bold text-gray-400">Venc:</span><p class="text-gray-400 text-sm text-center">${t.dueDate.toLocaleDateString('pt-BR')}</p></div>
-                        <div class="md:col-span-1 flex justify-between md:justify-center items-center"><span class="md:hidden font-bold text-gray-400">Tipo:</span><i data-lucide="${t.type === 'revenue' ? 'arrow-down' : 'arrow-up'}" class="${typeColor} w-5 h-5"></i></div>
-                        <div class="col-span-2 md:col-span-2 flex justify-end items-center space-x-2">
-                            ${actionButtonsHTML}
-                        </div>
+                        <div class="col-span-2 md:col-span-2 flex justify-end items-center space-x-2">${actionButtonsHTML}</div>
                     </div>`;
             },
             
@@ -1029,18 +1051,14 @@
                 this.elements.prevPeriodBtn.addEventListener('click', () => this.changePeriod(-1));
                 this.elements.nextPeriodBtn.addEventListener('click', () => this.changePeriod(1));
                 
-                this.elements.searchInput.addEventListener('input', e => { 
-                    this.state.filterText = e.target.value; 
-                    this.renderTransactions(); 
-                });
-                
-                this.elements.searchAmountInput.addEventListener('input', e => {
-                    const value = e.target.value;
-                    this.state.filterAmount = value === '' ? null : parseFloat(value);
-                    this.renderTransactions();
-                });
+                this.elements.searchInputRevenue.addEventListener('input', e => { this.state.filterTextRevenue = e.target.value; this.renderRevenueList(); });
+                this.elements.searchAmountInputRevenue.addEventListener('input', e => { const val = e.target.value; this.state.filterAmountRevenue = val === '' ? null : parseFloat(val); this.renderRevenueList(); });
+                this.elements.searchInputExpense.addEventListener('input', e => { this.state.filterTextExpense = e.target.value; this.renderExpenseList(); });
+                this.elements.searchAmountInputExpense.addEventListener('input', e => { const val = e.target.value; this.state.filterAmountExpense = val === '' ? null : parseFloat(val); this.renderExpenseList(); });
                 
                 this.elements.tabDashboard.addEventListener('click', () => this.switchView('dashboard'));
+                this.elements.tabReceitas.addEventListener('click', () => this.switchView('receitas'));
+                this.elements.tabDespesas.addEventListener('click', () => this.switchView('despesas'));
                 this.elements.tabConsultoria.addEventListener('click', () => this.switchView('consultoria-list'));
 
                 document.getElementById('add-transaction-btn').addEventListener('click', () => this.openTransactionModal());
@@ -1350,7 +1368,7 @@
                 );
             },
 
-            // --- LÓGICA AVANÇADA: TRANSAÇÕES FIXAS E DE SALDO ---
+            // --- LÓGICA AVANÇADA: TRANSAÇÕES FIXAS ---
             async generateFixedTransactionsForCurrentPeriod() {
                 const period = this.getPeriod(this.state.currentDateForPeriod);
 
@@ -1393,34 +1411,6 @@
                         console.error("Erro ao verificar ou gerar transação fixa: ", error);
                     }
                 }
-            },
-
-            getPreviousPeriodBalanceTransaction() {
-                const currentPeriod = this.getPeriod(this.state.currentDateForPeriod);
-                const prevMonthDate = new Date(currentPeriod.start);
-                prevMonthDate.setDate(0); 
-                const prevPeriod = this.getPeriod(prevMonthDate);
-
-                const prevPeriodTransactions = this.state.transactions.filter(t =>
-                    t.dueDate >= prevPeriod.start && t.dueDate <= prevPeriod.end
-                );
-                const received = prevPeriodTransactions.filter(t => t.type === 'revenue' && t.status === 'paid').reduce((sum, t) => sum + t.amount, 0);
-                const paid = prevPeriodTransactions.filter(t => t.type === 'expense' && t.status === 'paid').reduce((sum, t) => sum + t.amount, 0);
-                const realizedBalance = received - paid;
-
-                if (realizedBalance === 0) {
-                    return null;
-                }
-
-                return {
-                    id: `balance_${prevPeriod.start.getTime()}`,
-                    description: `Saldo Mês Anterior (${prevMonthDate.toLocaleDateString('pt-BR', {month: 'long'})})`,
-                    amount: Math.abs(realizedBalance),
-                    dueDate: currentPeriod.start,
-                    type: realizedBalance >= 0 ? 'revenue' : 'expense',
-                    status: 'paid',
-                    isBalanceTransfer: true,
-                };
             },
             
             // --- MÓDULO DE CONSULTORIA ---
